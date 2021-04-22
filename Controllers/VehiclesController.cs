@@ -22,7 +22,7 @@ namespace Vega.Controllers
 
         }
         [HttpPost]
-        public async Task<IActionResult> CreateVehicleAsync([FromBody] VehicleResource vehicleResource)
+        public async Task<IActionResult> CreateVehicleAsync([FromBody] SaveVehicleResource vehicleResource)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -35,15 +35,22 @@ namespace Vega.Controllers
                 return BadRequest(ModelState);
             }
 
-            var vehicle = mapper.Map<VehicleResource, Vehicle>(vehicleResource);
+            var vehicle = mapper.Map<SaveVehicleResource, Vehicle>(vehicleResource);
             vehicle.LastUpdate = DateTime.Now;
             context.Vehicles.Add(vehicle);
             await context.SaveChangesAsync();
-            return Ok(vehicle);
+            vehicle = await context.Vehicles
+            .Include(f => f.Features)
+            .ThenInclude(v => v.Feature)
+            .Include(v => v.Model)
+            .ThenInclude(m => m.Make)
+            .SingleOrDefaultAsync(v => v.Id == vehicle.Id);
+            var result = mapper.Map<Vehicle, VehicleResource>(vehicle);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVehicleAsync(int id, [FromBody] VehicleResource vehicleResource)
+        public async Task<IActionResult> UpdateVehicleAsync(int id, [FromBody] SaveVehicleResource vehicleResource)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -53,10 +60,14 @@ namespace Vega.Controllers
             if (model == null)
                 return NotFound();
 
-            var vehicle = await context.Vehicles.Include(v => v.Features).SingleOrDefaultAsync(vehicle => vehicle.Id == id);
+            var vehicle = await context.Vehicles
+            .Include(f => f.Features)
+            .ThenInclude(v => v.Feature)
+            .Include(v => v.Model)
+            .ThenInclude(m => m.Make)
+            .SingleOrDefaultAsync(v => v.Id == id);
 
-
-            var result = mapper.Map<VehicleResource, Vehicle>(vehicleResource, vehicle);
+            var result = mapper.Map<Vehicle, VehicleResource>(vehicle);
             vehicle.LastUpdate = DateTime.Now;
 
             await context.SaveChangesAsync();
@@ -84,11 +95,18 @@ namespace Vega.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVehicleAsync(int id)
         {
-            var vehicle = await context.Vehicles.Include(f => f.Features).SingleOrDefaultAsync(v => v.Id == id);
+            var vehicle = await context.Vehicles
+            .Include(f => f.Features)
+            .ThenInclude(v => v.Feature)
+            .Include(v => v.Model)
+            .ThenInclude(m => m.Make)
+            .SingleOrDefaultAsync(v => v.Id == id);
             if (vehicle == null)
                 return NotFound();
 
-            return Ok(vehicle);
+            var vehicleResource = mapper.Map<Vehicle, VehicleResource>(vehicle);
+
+            return Ok(vehicleResource);
         }
     }
 }
