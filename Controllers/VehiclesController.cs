@@ -40,7 +40,7 @@ namespace Vega.Controllers
 
             var vehicle = mapper.Map<SaveVehicleResource, Vehicle>(vehicleResource);
             vehicle.LastUpdate = DateTime.Now;
-            context.Vehicles.Add(vehicle);
+            _repository.Add(vehicle);
             await context.SaveChangesAsync();
             vehicle = await _repository.GetVehicleAsync(vehicle.Id);
             return Ok(vehicle);
@@ -70,7 +70,7 @@ namespace Vega.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicleAsync(int id)
         {
-            var vehicle = await context.Vehicles.FindAsync(id);
+            var vehicle = await _repository.GetVehicleAsync(id, includeRelated: false);
             if (vehicle == null)
                 return NotFound();
             context.Remove(vehicle);
