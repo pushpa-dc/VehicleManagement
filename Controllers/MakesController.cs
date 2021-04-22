@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vega.Data;
-using Vega.Models;
 
 namespace Vega.Controllers
 {
@@ -22,7 +17,7 @@ namespace Vega.Controllers
         }
         public async Task<IActionResult> GetMakesAsync()
         {
-            var makes = await _context.Makes.Include(m=>m.Models).ToListAsync();
+            var makes = await _context.Makes.Include(m => m.Models).ToListAsync();
             return Ok(makes);
         }
     }

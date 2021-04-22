@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Vega.Controllers.Resources;
 using Vega.Data;
 using Vega.Models;
+using VehicleManagement.Persistence;
 
 namespace Vega.Controllers
 {
@@ -15,8 +16,10 @@ namespace Vega.Controllers
     {
         private readonly IMapper mapper;
         private readonly ApplicationDbContext context;
-        public VehiclesController(IMapper mapper, ApplicationDbContext context)
+        private readonly IVehicleRepository _repository;
+        public VehiclesController(IMapper mapper, ApplicationDbContext context, IVehicleRepository repository)
         {
+            _repository = repository;
             this.context = context;
             this.mapper = mapper;
 
@@ -39,14 +42,8 @@ namespace Vega.Controllers
             vehicle.LastUpdate = DateTime.Now;
             context.Vehicles.Add(vehicle);
             await context.SaveChangesAsync();
-            vehicle = await context.Vehicles
-            .Include(f => f.Features)
-            .ThenInclude(v => v.Feature)
-            .Include(v => v.Model)
-            .ThenInclude(m => m.Make)
-            .SingleOrDefaultAsync(v => v.Id == vehicle.Id);
-            var result = mapper.Map<Vehicle, VehicleResource>(vehicle);
-            return Ok(result);
+            vehicle = await _repository.GetVehicleAsync(vehicle.Id);
+            return Ok(vehicle);
         }
 
         [HttpPut("{id}")]
@@ -60,12 +57,7 @@ namespace Vega.Controllers
             if (model == null)
                 return NotFound();
 
-            var vehicle = await context.Vehicles
-            .Include(f => f.Features)
-            .ThenInclude(v => v.Feature)
-            .Include(v => v.Model)
-            .ThenInclude(m => m.Make)
-            .SingleOrDefaultAsync(v => v.Id == id);
+            var vehicle = await _repository.GetVehicleAsync(id);
 
             var result = mapper.Map<Vehicle, VehicleResource>(vehicle);
             vehicle.LastUpdate = DateTime.Now;
@@ -95,12 +87,7 @@ namespace Vega.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVehicleAsync(int id)
         {
-            var vehicle = await context.Vehicles
-            .Include(f => f.Features)
-            .ThenInclude(v => v.Feature)
-            .Include(v => v.Model)
-            .ThenInclude(m => m.Make)
-            .SingleOrDefaultAsync(v => v.Id == id);
+            var vehicle = await _repository.GetVehicleAsync(id);
             if (vehicle == null)
                 return NotFound();
 
