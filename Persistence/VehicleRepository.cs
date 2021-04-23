@@ -22,7 +22,7 @@ namespace VehicleManagement.Persistence
 
         public async Task<Vehicle> GetVehicleAsync(int id, bool includeRelated = true)
         {
-            if (includeRelated != false)
+            if (!includeRelated)
                 return await _context.Vehicles.FindAsync(id);
             var vehicle = await _context.Vehicles
             .Include(v => v.Features)
