@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { SaveVehicle } from 'src/app/models/SaveVehicle';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class VehicleService {
+
 
   constructor(private http: HttpClient) { }
 
@@ -24,4 +26,9 @@ export class VehicleService {
   getVehicle(id) {
     return this.http.get("/api/vehicles/" + id);
   }
+
+  update(vehicle: SaveVehicle) {
+    return this.http.put("/api/vehicles/" + vehicle.id, vehicle);
+  }
+
 }

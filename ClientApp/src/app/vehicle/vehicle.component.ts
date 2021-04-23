@@ -68,21 +68,7 @@ export class VehicleComponent implements OnInit {
     );
     if (this.vehicle.id)
       sources.push(this.vehicleService.getVehicle(this.vehicle.id));
-    // this.vehicleService.getVehicle(this.vehicle.id).subscribe(v => {
-    //   this.vehicle = v;
 
-    // }, error => {
-    //   if (error.status == 400) {
-    //     this.router.navigate["/home"];
-    //   }
-    // })
-    // this.vehicleService.getMakes().subscribe(m => {
-    //   this.makes = m;
-    //   console.log(this.makes)
-    // });
-    // this.vehicleService.getFeatures().subscribe(featues => {
-    //   this.features = featues;
-    // })
 
 
   }
@@ -115,14 +101,20 @@ export class VehicleComponent implements OnInit {
 
   submit() {
 
+    if (this.vehicle.id) {
+      this.vehicleService.update(this.vehicle).subscribe(x => {
+        this.notifier.notify("Error", "This is error");
+      });
+    } else {
 
-    this.vehicleService.create(this.vehicle).subscribe(
-      x => console.log(x),
-      error => {
-        // this.notifier.notify('error', 'You are awesome! I mean it!');
-      }
+      this.vehicleService.create(this.vehicle).subscribe(
+        x => console.log(x),
+        error => {
+          // this.notifier.notify('error', 'You are awesome! I mean it!');
+        }
 
-    )
+      )
+    }
   }
 
 
