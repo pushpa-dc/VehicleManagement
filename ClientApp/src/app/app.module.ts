@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { ErrorHandler, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -13,6 +13,9 @@ import { ApiAuthorizationModule } from 'src/api-authorization/api-authorization.
 import { AuthorizeGuard } from 'src/api-authorization/authorize.guard';
 import { AuthorizeInterceptor } from 'src/api-authorization/authorize.interceptor';
 import { VehicleComponent } from './vehicle/vehicle.component';
+import { NotifierModule } from 'angular-notifier';
+import { AppErrorHandler } from './app.error-handler';
+
 
 @NgModule({
   declarations: [
@@ -28,16 +31,19 @@ import { VehicleComponent } from './vehicle/vehicle.component';
     HttpClientModule,
     FormsModule,
     ApiAuthorizationModule,
+    NotifierModule,
 
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'counter', component: CounterComponent },
       { path: 'vehicle/new', component: VehicleComponent },
+      { path: 'vehicle/:id', component: VehicleComponent },
       { path: 'fetch-data', component: FetchDataComponent, canActivate: [AuthorizeGuard] },
-    ])
+    ], { relativeLinkResolution: 'legacy' })
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthorizeInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthorizeInterceptor, multi: true },
+    { provide: ErrorHandler, useClass: AppErrorHandler }
   ],
   bootstrap: [AppComponent]
 })
