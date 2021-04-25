@@ -15,6 +15,7 @@ import { AuthorizeInterceptor } from 'src/api-authorization/authorize.intercepto
 import { VehicleComponent } from './vehicle/vehicle.component';
 import { NotifierModule } from 'angular-notifier';
 import { AppErrorHandler } from './app.error-handler';
+import { ListVehiclesComponent } from './list-vehicles/list-vehicles.component';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { AppErrorHandler } from './app.error-handler';
     HomeComponent,
     CounterComponent,
     FetchDataComponent,
-    VehicleComponent
+    VehicleComponent,
+    ListVehiclesComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -34,7 +36,7 @@ import { AppErrorHandler } from './app.error-handler';
     NotifierModule,
 
     RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' },
+      { path: '', component: ListVehiclesComponent, pathMatch: 'full' },
       { path: 'counter', component: CounterComponent },
       { path: 'vehicle/new', component: VehicleComponent },
       { path: 'vehicle/:id', component: VehicleComponent },
