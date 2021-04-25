@@ -109,7 +109,7 @@ export class VehicleComponent implements OnInit {
 
     if (this.vehicle.id) {
       this.vehicleService.update(this.vehicle).subscribe(x => {
-        this.notifier.notify("Error", "This is error");
+        this.notifier.notify("error", "This is error");
       });
     } else {
 
