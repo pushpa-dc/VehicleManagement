@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -33,20 +34,17 @@ namespace Vega.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var model = context.Models.Find(vehicleResource.ModelId);
-
-            if (model == null)
-            {
-                ModelState.AddModelError("ModelId", "Invalid Model Id");
-                return BadRequest(ModelState);
-            }
-
             var vehicle = mapper.Map<SaveVehicleResource, Vehicle>(vehicleResource);
             vehicle.LastUpdate = DateTime.Now;
+
             _repository.Add(vehicle);
             await _unitOfWork.CompleteAsync();
+
             vehicle = await _repository.GetVehicleAsync(vehicle.Id);
-            return Ok(vehicle);
+
+            var result = mapper.Map<Vehicle, VehicleResource>(vehicle);
+
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -55,9 +53,7 @@ namespace Vega.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // var model = await _repository.GetVehicleAsync(id);
-            // var model = await context.Vehicles.Include(v => v.Features).SingleOrDefaultAsync(v => v.Id == id);
-
+    
             var vehicle = await _repository.GetVehicleAsync(id);
             if (vehicle == null)
                 return NotFound();
@@ -86,7 +82,12 @@ namespace Vega.Controllers
 
         public async Task<IActionResult> GetVehiclesAsync()
         {
-            var vehicles = await context.Vehicles.Include(f => f.Features).ToListAsync();
+            var vehicles = await context.Vehicles
+        .Include(v => v.Model)
+          .ThenInclude(m => m.Make)
+          .Include(f => f.Features)
+          .ThenInclude(f => f.Feature)
+        .ToListAsync();
             return Ok(vehicles);
         }
 
